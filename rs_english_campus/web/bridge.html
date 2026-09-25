@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>English Campus — bridge</title>
+  <style>
+    /* Page NUI propre à la ressource : TOUJOURS invisible et transparente par défaut
+       (FiveM l'affiche en permanence par-dessus le jeu). Elle relaie les évènements temps réel
+       vers l'application et affiche le cadre autonome (/english, /englishpc) si besoin. */
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: transparent; }
+    body { visibility: hidden; font-family: system-ui, sans-serif; }
+    body.open { visibility: visible; }
+
+    .veil { position: fixed; inset: 0; background: radial-gradient(ellipse at 70% 50%, rgba(8, 12, 24, 0.35), rgba(8, 12, 24, 0.6)); opacity: 0; transition: opacity 0.3s ease; }
+    body.open .veil { opacity: 1; }
+
+    .device { position: fixed; opacity: 0; transition: opacity 0.28s ease, transform 0.38s cubic-bezier(0.16, 1, 0.3, 1); }
+    body.open .device { opacity: 1; transform: none; }
+
+    .device.phone {
+      right: 7vw; top: 50%; width: 400px; height: min(860px, 92vh);
+      margin-top: calc(min(860px, 92vh) / -2);
+      transform: translateY(40px);
+      padding: 12px; border-radius: 58px; background: #0b0d12;
+      box-shadow: 0 0 0 2px #2a2f3a, 0 40px 90px -30px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+    }
+    .device.phone::before {
+      content: ''; position: absolute; top: 22px; left: 50%; width: 118px; height: 32px; margin-left: -59px;
+      border-radius: 20px; background: #000; z-index: 3;
+    }
+    .device.phone iframe { width: 100%; height: 100%; border: 0; border-radius: 46px; background: #f5f2ea; display: block; }
+
+    .device.pc {
+      left: 50%; top: 50%; width: min(1180px, 94vw); height: min(760px, 90vh);
+      transform: translate(-50%, -48%) scale(0.98);
+      border-radius: 14px; overflow: hidden; background: #111; display: flex; flex-direction: column;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 50px 120px -40px rgba(0, 0, 0, 0.85);
+    }
+    body.open .device.pc { transform: translate(-50%, -50%); }
+    .device.pc .titlebar {
+      height: 38px; display: flex; align-items: center; gap: 10px; padding: 0 8px 0 14px;
+      background: #171b26; color: #cfd6e6; font-size: 13px; font-weight: 600; letter-spacing: 0.01em; flex-shrink: 0;
+    }
+    .device.pc .titlebar .dot { width: 10px; height: 10px; border-radius: 50%; background: #2447a8; box-shadow: 16px 0 0 #c8961e, 32px 0 0 #d13b3b; margin-right: 34px; }
+    .device.pc .titlebar .grow { flex: 1; }
+    .device.pc iframe { flex: 1; width: 100%; border: 0; background: #f5f2ea; display: block; }
+
+    .close {
+      width: 30px; height: 30px; border: 0; border-radius: 8px; background: transparent; color: inherit; cursor: pointer;
+      display: grid; place-items: center; font-size: 18px; line-height: 1;
+    }
+    .close:hover { background: rgba(255, 255, 255, 0.1); }
+    .phone-close {
+      position: fixed; right: calc(7vw + 412px); top: calc(50% - min(860px, 92vh) / 2); width: 40px; height: 40px;
+      border-radius: 50%; background: rgba(12, 16, 26, 0.75); color: #fff; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+    body.open .phone-close { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="veil"></div>
+  <script src="js/bridge.js"></script>
+</body>
+</html>

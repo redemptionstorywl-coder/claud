@@ -1,0 +1,117 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   English Campus — jetons de design
+   Identité « copie d'école » : papier crème, encre bleue, stylo rouge du correcteur,
+   étoile dorée. Toutes les variables sont préfixées --ec- (pas de conflit avec le téléphone).
+   ════════════════════════════════════════════════════════════════════════════ */
+
+@font-face { font-family: 'EC Sans'; font-weight: 400; font-style: normal; font-display: swap; src: url('../assets/fonts/dm-sans-400.woff2') format('woff2'); }
+@font-face { font-family: 'EC Sans'; font-weight: 500; font-style: normal; font-display: swap; src: url('../assets/fonts/dm-sans-500.woff2') format('woff2'); }
+@font-face { font-family: 'EC Sans'; font-weight: 600; font-style: normal; font-display: swap; src: url('../assets/fonts/dm-sans-600.woff2') format('woff2'); }
+@font-face { font-family: 'EC Sans'; font-weight: 700; font-style: normal; font-display: swap; src: url('../assets/fonts/dm-sans-700.woff2') format('woff2'); }
+@font-face { font-family: 'EC Serif'; font-weight: 600; font-style: normal; font-display: swap; src: url('../assets/fonts/fraunces-600.woff2') format('woff2'); }
+@font-face { font-family: 'EC Serif'; font-weight: 700; font-style: normal; font-display: swap; src: url('../assets/fonts/fraunces-700.woff2') format('woff2'); }
+@font-face { font-family: 'EC Serif'; font-weight: 500; font-style: italic; font-display: swap; src: url('../assets/fonts/fraunces-500-italic.woff2') format('woff2'); }
+
+:root {
+  --ec-font: 'EC Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --ec-serif: 'EC Serif', Georgia, 'Times New Roman', serif;
+
+  /* Papier */
+  --ec-bg: #f5f2ea;
+  --ec-bg-deep: #ede8dc;
+  --ec-surface: #ffffff;
+  --ec-surface-2: #fbfaf6;
+  --ec-surface-3: #f1ede4;
+  --ec-bg-glass: rgba(245, 242, 234, 0.86);
+  --ec-surface-glass: rgba(255, 255, 255, 0.86);
+  --ec-overlay: rgba(18, 22, 34, 0.42);
+  --ec-line: rgba(22, 28, 45, 0.08);
+  --ec-line-strong: rgba(22, 28, 45, 0.15);
+  --ec-rule: rgba(52, 96, 190, 0.10);   /* lignes du cahier */
+  --ec-margin-rule: rgba(209, 59, 59, 0.28);
+
+  /* Encre */
+  --ec-text: #151b2b;
+  --ec-text-2: #4b5264;
+  --ec-text-3: #8b909d;
+
+  /* Couleurs de marque (surchargées par Config.Theme) */
+  --ec-accent: #2447a8;
+  --ec-accent-strong: #1b3786;
+  --ec-accent-soft: rgba(36, 71, 168, 0.09);
+  --ec-accent-line: rgba(36, 71, 168, 0.22);
+  --ec-on-accent: #ffffff;
+  --ec-correct: #1f8a5b;
+  --ec-correct-soft: rgba(31, 138, 91, 0.11);
+  --ec-wrong: #d13b3b;
+  --ec-wrong-soft: rgba(209, 59, 59, 0.10);
+  --ec-gold: #c8961e;
+  --ec-gold-soft: rgba(200, 150, 30, 0.14);
+
+  /* Relief */
+  --ec-shadow-1: 0 1px 2px rgba(20, 26, 40, 0.05), 0 1px 1px rgba(20, 26, 40, 0.03);
+  --ec-shadow-2: 0 10px 28px -16px rgba(20, 26, 40, 0.28), 0 2px 6px rgba(20, 26, 40, 0.04);
+  --ec-shadow-3: 0 28px 60px -24px rgba(12, 18, 32, 0.45), 0 8px 18px -10px rgba(12, 18, 32, 0.2);
+
+  /* Formes */
+  --ec-radius: 1rem;
+  --ec-radius-sm: 0.625rem;
+  --ec-radius-xs: 0.4375rem;
+  --ec-radius-lg: 1.375rem;
+
+  /* Mouvement */
+  --ec-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ec-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ec-ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --ec-dur: 240ms;
+  --ec-dur-fast: 150ms;
+
+  /* Zones sûres (téléphone : barre d'état / indicateur d'accueil) */
+  --ec-safe-top: 0rem;
+  --ec-safe-bottom: 0rem;
+  --ec-tabbar-h: 4.25rem;
+
+  color-scheme: light;
+}
+
+:root[data-ec-theme='dark'] {
+  --ec-bg: #0b111e;
+  --ec-bg-deep: #080d18;
+  --ec-surface: #131a2b;
+  --ec-surface-2: #161e31;
+  --ec-surface-3: #1c253b;
+  --ec-bg-glass: rgba(11, 17, 30, 0.86);
+  --ec-surface-glass: rgba(19, 26, 43, 0.88);
+  --ec-overlay: rgba(2, 5, 12, 0.62);
+  --ec-line: rgba(225, 232, 248, 0.07);
+  --ec-line-strong: rgba(225, 232, 248, 0.14);
+  --ec-rule: rgba(120, 150, 255, 0.07);
+  --ec-margin-rule: rgba(240, 106, 106, 0.22);
+
+  --ec-text: #e9edf6;
+  --ec-text-2: #aab2c5;
+  --ec-text-3: #6f7890;
+
+  --ec-accent: #7d9bff;
+  --ec-accent-strong: #a3b8ff;
+  --ec-accent-soft: rgba(125, 155, 255, 0.13);
+  --ec-accent-line: rgba(125, 155, 255, 0.3);
+  --ec-on-accent: #0b111e;
+  --ec-correct: #43c28a;
+  --ec-correct-soft: rgba(67, 194, 138, 0.13);
+  --ec-wrong: #f27070;
+  --ec-wrong-soft: rgba(242, 112, 112, 0.13);
+  --ec-gold: #e3b54a;
+  --ec-gold-soft: rgba(227, 181, 74, 0.14);
+
+  --ec-shadow-1: 0 1px 0 rgba(255, 255, 255, 0.02) inset, 0 1px 2px rgba(0, 0, 0, 0.3);
+  --ec-shadow-2: 0 12px 30px -18px rgba(0, 0, 0, 0.7), 0 1px 0 rgba(255, 255, 255, 0.03) inset;
+  --ec-shadow-3: 0 30px 70px -26px rgba(0, 0, 0, 0.85);
+
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --ec-dur: 1ms; --ec-dur-fast: 1ms; }
+}
+:root[data-ec-motion='reduced'] { --ec-dur: 1ms; --ec-dur-fast: 1ms; }
