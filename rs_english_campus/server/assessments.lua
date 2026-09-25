@@ -410,6 +410,10 @@ function Assessments.ResultView(row, st, forStudent)
                 local item = Questions.toStudent(q, { shuffleOptions = false })
                 item.answer = ans and EC.JsonDecode(ans.answer, {}) or nil
                 if ans and ans.is_correct ~= nil then item.correct = U.bool(ans.is_correct) end
+                if item.answer then
+                    -- Détail par trou / par paire pour colorer la correction (recalculé, jamais stocké côté client).
+                    item.detail = Grading.grade(q, item.answer).detail
+                end
                 item.earned = ans and ans.points or 0
                 item.max = q.points
                 item.pending = ans ~= nil and not U.bool(ans.graded)

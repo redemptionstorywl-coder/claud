@@ -161,12 +161,11 @@ Rpc.Register('results:mine', { cap = 'results.own' }, function(ctx)
     return { items = items, average = average, counted = counted, scale = scale() }
 end)
 
-Rpc.Register('progress:mine', { cap = 'progress.own' }, function(ctx)
-    local p = ctx.profile
-    local out = { themes = Grades.Themes(p.campusId), scale = scale() }
-
+--- Synthèse de progression d'un élève : cours, exercices, vocabulaire et pourcentage global.
+--- Partagée par le tableau de bord et l'écran « Ma progression » pour afficher le même chiffre partout.
+function Grades.Summary(p)
     local courses = Grades.CourseProgress(p.classId, { p.campusId })[p.campusId] or { percent = 0, completed = 0, total = 0 }
-    out.courses = courses
+    local out = { courses = courses, exercises = { total = 0, done = 0 }, vocabulary = { total = 0, mastered = 0 } }
 
     if p.classId then
         out.exercises = {
@@ -191,10 +190,21 @@ Rpc.Register('progress:mine', { cap = 'progress.own' }, function(ctx)
             LEFT JOIN campus_english_vocab_stats st ON st.word_id = v.id AND st.student_id = ?
         ]], Config.Pedagogy.Vocabulary.MasteredBox or 4, p.classId, p.campusId) or {}
         out.vocabulary = { total = tonumber(vocab.total) or 0, mastered = tonumber(vocab.mastered) or 0 }
-    else
-        out.exercises = { total = 0, done = 0 }
-        out.vocabulary = { total = 0, mastered = 0 }
     end
+
+    -- Progression globale : moyenne des cours, exercices et vocabulaire maîtrisé.
+    local parts, sum = 0, 0
+    if courses.total > 0 then parts, sum = parts + 1, sum + courses.percent end
+    if out.exercises.total > 0 then parts, sum = parts + 1, sum + math.min(100, out.exercises.done / out.exercises.total * 100) end
+    if out.vocabulary.total > 0 then parts, sum = parts + 1, sum + out.vocabulary.mastered / out.vocabulary.total * 100 end
+    out.overall = parts > 0 and math.floor(sum / parts) or 0
+    return out
+end
+
+Rpc.Register('progress:mine', { cap = 'progress.own' }, function(ctx)
+    local p = ctx.profile
+    local out = Grades.Summary(p)
+    out.themes, out.scale = Grades.Themes(p.campusId), scale()
 
     local released = releasedGrades({ p.campusId })
     out.average, out.assessments = Grades.Average(released)
@@ -207,13 +217,6 @@ Rpc.Register('progress:mine', { cap = 'progress.own' }, function(ctx)
             }
         end
     end
-
-    -- Progression globale : moyenne des cours, exercices et vocabulaire maîtrisé.
-    local parts, sum = 0, 0
-    if courses.total > 0 then parts, sum = parts + 1, sum + courses.percent end
-    if out.exercises.total > 0 then parts, sum = parts + 1, sum + math.min(100, out.exercises.done / out.exercises.total * 100) end
-    if out.vocabulary.total > 0 then parts, sum = parts + 1, sum + out.vocabulary.mastered / out.vocabulary.total * 100 end
-    out.overall = parts > 0 and math.floor(sum / parts) or 0
     return out
 end)
 
@@ -552,11 +555,11 @@ end)
 Rpc.Register('live:subscribe', { role = 'teacher', cap = 'live.use' }, function(ctx, data)
     local kind = V.enum(data.type, { course = true, assessment = true }, 'type')
     local id = V.id(data.id, 'id')
-    local classIds, entries = {}, {}
+    local classIds, entries, title = {}, {}, nil
 
     if kind == 'course' then
         local st = Courses.ForOwner(ctx.profile, id)
-        classIds = st.classIds
+        classIds, title = st.classIds, st.course.title
         if #classIds > 0 then
             local members = DB.query(([[
                 SELECT m.campus_id, m.first_name, m.last_name, m.class_id, p.status, p.updated_at,
@@ -577,7 +580,7 @@ Rpc.Register('live:subscribe', { role = 'teacher', cap = 'live.use' }, function(
         end
     else
         local st = Assessments.ForOwner(ctx.profile, id)
-        classIds = st.classIds
+        classIds, title = st.classIds, st.a.title
         local wanted = st.a.question_count or 0
         local effectiveTotal = (wanted > 0 and wanted < #st.questions) and wanted or #st.questions
         if #classIds > 0 then
@@ -610,5 +613,5 @@ Rpc.Register('live:subscribe', { role = 'teacher', cap = 'live.use' }, function(
 
     table.sort(entries, function(x, y) return x.name < y.name end)
     Live.Subscribe(ctx.src, kind .. ':' .. id)
-    return { key = kind .. ':' .. id, entries = entries, classes = Classes.Labels(classIds), serverNow = EC.Now() }
+    return { key = kind .. ':' .. id, title = title, entries = entries, classes = Classes.Labels(classIds), serverNow = EC.Now() }
 end)

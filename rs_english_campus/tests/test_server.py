@@ -260,6 +260,12 @@ def good_answer(q):
     }[q['prompt']]
 
 
+def bad_answer(q):
+    return {
+        'Q1': {'choice': 'b'}, 'Q2': {'value': True}, 'Q3': {'text': 'goed'}, 'Q4': {'choice': 'a'}, 'Q5': {'value': False},
+    }[q['prompt']]
+
+
 def test_assessment_flow():
     h = setup()
     h.pushes()
@@ -290,14 +296,14 @@ def test_assessment_flow():
     assert err == 'not_found'
 
     for i, q in enumerate(qs):
-        ans = good_answer(q) if i < 2 else {'text': 'wrong', 'choice': 'a', 'value': not good_answer(q).get('value', True)}
+        ans = good_answer(q) if i < 2 else bad_answer(q)
         saved = h.ok(STUDENT, 'assessment:save', {'attemptId': att['id'], 'questionId': q['id'], 'answer': ans})
     assert saved['answered'] == 3
 
     h.advance(14 * 60 + 32)
     result = h.ok(STUDENT, 'assessment:submit', {'attemptId': att['id']})
     assert result['status'] == 'released'
-    assert abs(result['grade'] - 13.5) < 0.01 or abs(result['grade'] - 13.0) < 0.6, result  # 2/3 → 13,33 → arrondi 0.5
+    assert result['grade'] == 13.5 and result['score'] == 2, result  # 2/3 → 13,33 → arrondi au 0,5 le plus proche
     assert result['durationSec'] == 14 * 60 + 32
     assert result['canReview'] and len(result['review']) == 3
 
@@ -444,6 +450,7 @@ def test_teacher_gradebook_live_and_vocab():
     h = setup()
     course_id = create_published_course(h)
     live = h.ok(TEACHER, 'live:subscribe', {'type': 'course', 'id': course_id})
+    assert live['title'] == 'The Present Perfect'
     assert {e['name'] for e in live['entries']} == {'Lucas Martin', 'Emma Bernard'}
     h.pushes()
     answer_all(h, STUDENT, course_id)
@@ -482,6 +489,9 @@ def test_teacher_gradebook_live_and_vocab():
 
     progress = h.ok(STUDENT, 'progress:mine')
     assert progress['average'] == 20 and progress['courses']['total'] == 1 and progress['vocabulary']['total'] == 3
+    # L'accueil et « Ma progression » affichent le même pourcentage global.
+    home = h.ok(STUDENT, 'dashboard:get')['dashboard']
+    assert home['overall'] == progress['overall'] and 0 < progress['overall'] <= 100
 
     msg = h.ok(TEACHER, 'notifications:send', {'classIds': [tb], 'title': 'Sortez vos téléphones', 'body': 'Ouvrez English Campus.'})
     assert msg['sent'] == 1

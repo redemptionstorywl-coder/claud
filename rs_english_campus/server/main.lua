@@ -71,9 +71,8 @@ end)
 function Dashboard.Student(p)
     local courses = Courses.StudentList(p)
     local counts = { available = #courses, started = 0, completed = 0, exercisesTodo = 0, assessmentsTodo = 0 }
-    local continueList, newList, percentSum = {}, {}, 0
+    local continueList, newList = {}, {}
     for _, c in ipairs(courses) do
-        percentSum = percentSum + c.percent
         if c.state == 'completed' then
             counts.completed = counts.completed + 1
         elseif c.state == 'started' then
@@ -126,7 +125,7 @@ function Dashboard.Student(p)
     end
     return {
         counts        = counts,
-        overall       = #courses > 0 and math.floor(percentSum / #courses) or 0,
+        overall       = Grades.Summary(p).overall,
         continue      = first(continueList, 3),
         new           = first(newList, 3),
         assessments   = first(todo, 3),

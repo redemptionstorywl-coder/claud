@@ -126,8 +126,8 @@ function DB.runFile(path)
     if not content then return false, 'file not found: ' .. path end
     content = content:gsub('%-%-[^\n]*', '')
     local count = 0
-    for statement in content:gmatch('[^;]+') do
-        statement = EC.U.trim(statement)
+    for chunk in content:gmatch('[^;]+') do
+        local statement = EC.U.trim(chunk)
         if statement ~= '' then
             local ok, err = pcall(MySQL.query.await, statement, {})
             if not ok then return false, err end

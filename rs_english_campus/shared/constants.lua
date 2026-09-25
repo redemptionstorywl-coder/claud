@@ -50,7 +50,7 @@ EC.Const = {
     -- Icônes disponibles pour les cours (clés d'icônes de l'interface).
     Emblems = {
         book = true, grammar = true, chat = true, globe = true, pen = true, headphones = true,
-        star = true, bulb = true, flag = true, clock = true, theater = true, music = true,
+        star = true, bulb = true, flag = true, clock = true, mic = true, music = true,
     },
 
     -- Niveaux de difficulté

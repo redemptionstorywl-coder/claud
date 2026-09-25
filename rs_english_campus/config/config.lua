@@ -120,6 +120,7 @@ Config.Campus = {
     -- 'export'    : appelle exports[Resource][Export](source) et lit les champs ci-dessous
     -- 'statebag'  : lit Player(source).state[StateBagKey]
     -- 'sql'       : lit la table SQL du Campus (voir Sql)
+    -- 'push'      : votre Campus envoie le compte : exports.rs_english_campus:SetCampusAccount(source, compte)
     -- 'framework' : identité = personnage ESX / QBCore / Qbox (pas de Campus)
     -- 'custom'    : utilise Config.Campus.Custom(source) ci-dessous
     Mode = 'export',

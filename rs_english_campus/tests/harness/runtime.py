@@ -56,7 +56,7 @@ def manifest_scripts():
 
 
 class Harness:
-    def __init__(self, database='ec_test', user='root', password='', host='localhost', reset=True, config_overrides=None):
+    def __init__(self, database='ec_test', user='root', password='', host='localhost', reset=True, config_overrides=None, realtime=False):
         self.database = database
         self.conn = pymysql.connect(host=host, user=user, password=password, charset='utf8mb4', autocommit=True,
                                     unix_socket='/run/mysqld/mysqld.sock' if host == 'localhost' else None)
@@ -66,8 +66,10 @@ class Harness:
                 cur.execute(f'CREATE DATABASE `{database}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci')
         self.conn.select_db(database)
 
+        self.realtime = realtime
         self.clock_ms = 1_000_000
         self.epoch_base = int(time.time())
+        self._t0 = time.monotonic()
         self.time_offset = 0
         self.players = {}          # src -> dict(name, license, aces:set, account:dict)
         self.outbox = []           # (event, target, args)
@@ -80,8 +82,8 @@ class Harness:
         self.lua = lua54.LuaRuntime(unpack_returned_tuples=True)
         self.lua.execute(f"package.path = '{HARNESS}/?.lua;' .. package.path")
         host = self.lua.table_from({
-            'epoch': lambda: self.epoch_base + self.clock_ms // 1000 + self.time_offset,
-            'now_ms': lambda: self.clock_ms,
+            'epoch': lambda: (int(time.time()) if self.realtime else self.epoch_base + self.clock_ms // 1000) + self.time_offset,
+            'now_ms': lambda: self._now_ms(),
             'outbox': self._outbox,
             'error': self._error,
             'players': lambda: self.lua.table_from(sorted(self.players.keys())),
@@ -225,8 +227,15 @@ class Harness:
             return False
 
     # ── Simulation ──────────────────────────────────────────────────────────
+    def _now_ms(self):
+        if self.realtime:
+            return 1_000_000 + int((time.monotonic() - self._t0) * 1000)
+        return self.clock_ms
+
     def run(self, ms=0, until=None, max_ms=60_000):
         """Fait tourner les threads Lua ; avance l'horloge si tout le monde attend."""
+        if self.realtime:
+            return self._run_realtime(ms, until, max_ms)
         g = self.lua.globals()
         target = self.clock_ms + ms
         spent = 0
@@ -242,6 +251,17 @@ class Harness:
             spent += step
             if spent > max_ms:
                 return False
+
+    def _run_realtime(self, ms, until, max_ms):
+        g = self.lua.globals()
+        deadline = time.monotonic() + (max_ms if until else ms) / 1000
+        while True:
+            g['__tick']()
+            if until and until():
+                return True
+            if time.monotonic() >= deadline:
+                return not until
+            time.sleep(0.002)
 
     def advance(self, seconds):
         """Avance le temps réel simulé (os.time) sans faire tourner les threads."""
